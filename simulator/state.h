@@ -7,6 +7,10 @@ typedef struct stateStruct
     int instruction;
     int imm;
     int rt;
+    int rs;
+    int rd;
+    int clockCycles;
+    int isActiveIRQ;
     int memory[MEMORY_SIZE];
     int registers[NUM_REGISTERS];
     int ioRegisters[NUM_IO_REGISTERS];

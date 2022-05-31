@@ -2,26 +2,28 @@
 #include "ops.h"
 #include "global.h"
 #include "files.h"
-
-// Consts:
-#define TRUE 1
-#define FALSE 0
+#include "interrupts.h"
 
 void fetch()
 {
-    // Update Pipeline Register
     state.instruction = state.memory[state.pc];
-    state.pc = state.pc + 1;
+    state.pc++;
+
+    UpdateTimer();
 }
 
 void decode()
 {
-    state.imm = GetImm();
-    state.rm = GetRM();
-    state.rt = GetRT();
-    state.rs = GetRS();
-    state.rd = GetRD();
-    state.opcode = GetOpcode();
+    state.rt = get_rt();
+    state.rs = get_rs();
+    state.rd = get_rd();
+    state.opcode = get_opcode();
+
+    if (state.rt == IMM_REG_NUM | state.rs == IMM_REG_NUM)
+    {
+        fetch();
+        state.imm = GetImm();
+    }
 }
 
 void execute()
@@ -79,9 +81,11 @@ void execute()
         break;
     case LW_OP_NUM:
         lw();
+        UpdateTimer();
         break;
     case SW_OP_NUM:
         sw();
+        UpdateTimer();
         break;
     case RETI_OP_NUM:
         reti();
@@ -116,16 +120,16 @@ void execute()
         break;
     case HALT_OP_NUM:
         break;
-    
+
     default:
         // Error.
-        fprintf("ERROR: Instruction not recognized:" );
+        fprintf("ERROR: Instruction not recognized:");
         printInstruction(state.IDEX.instr);
         exit(1);
         break;
     }
     UpdateAndCheckDisk();
-    PerformInterupt();
+    PerformInterrupt();
     IOReg[8] = (IOReg[8] + 1) % 0xffffffff;
 }
 
@@ -137,7 +141,6 @@ void writeBack()
 {
 }
 
-
 void runProcessor()
 {
     while (TRUE)
@@ -147,5 +150,7 @@ void runProcessor()
         execute();   // EX stage
         memory();    // MEM stage
         writeBack(); // WB stage
+
+        PerformInterrupt();
     }
 }

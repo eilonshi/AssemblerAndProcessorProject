@@ -16,3 +16,8 @@ extern FILE *monitor_yuv_file;
 
 void OpenAllFiles();
 void CloseAllFiles();
+
+void WriteToLedsFile();
+void WriteToDisplay7SegFile();
+void WritePixelToMonitor();
+void WriteToHwregtraceFile();
