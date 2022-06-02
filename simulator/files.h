@@ -14,10 +14,15 @@ extern FILE *diskout_file;
 extern FILE *monitor_file;
 extern FILE *monitor_yuv_file;
 
-void OpenAllFiles();
-void CloseAllFiles();
+void open_all_files();
+void close_all_files();
 
 void WriteToLedsFile();
 void WriteToDisplay7SegFile();
 void WritePixelToMonitor();
 void WriteToHwregtraceFile();
+void WriteToTrace();
+void WriteToRegout();
+void WriteToCycles();
+void WriteToDiskout();
+void WriteToMonitor();

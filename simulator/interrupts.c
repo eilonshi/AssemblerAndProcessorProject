@@ -9,6 +9,8 @@ int GetNextIRQ2()
 
 void UpdateTimer()
 {
+    state.ioRegisters[CLKS] = (state.ioRegisters[CLKS] + 1) % 0xffffffff;
+	
 	if (state.ioRegisters[TIMER_ENABLE] == TRUE)
 	{
 		if (state.ioRegisters[TIMER_CURRENT] == state.ioRegisters[TIMER_MAX])
@@ -19,41 +21,14 @@ void UpdateTimer()
 		else
 			state.ioRegisters[TIMER_CURRENT]++;
 	}
+
+	if (state.ioRegisters[DISK_STATUS] == BUSY)
+    {
+        state.timer_disk++;
+    }
 }
 
-void UpdateAndCheckDisk()
-{
-	int i = 0;
-	if (state.ioRegisters[17] == 0) // diskstatus=0 (free to receive new command)
-	{
-		timer_disk = 0;
-		if (state.ioRegisters[14] == 2) // diskcmd=2 (write sector)
-		{
-			state.ioRegisters[17] = 1;	 // diskstatus=1
-			for (; i < SIZE_SECTOR; i++) // MemDisk[disksector]=Memory[diskbuffer]
-				MemDisk[state.ioRegisters[15]][i] = Mem[state.ioRegisters[16] + i];
-		}
-		else if (state.ioRegisters[14] == 1) // diskcmd=1 (read sector)
-		{
-			state.ioRegisters[17] = 1;	 // diskstatus=1
-			for (; i < SIZE_SECTOR; i++) // Memory[diskbuffer]=MemDisk[disksector]
-				Mem[state.ioRegisters[16] + i] = MemDisk[state.ioRegisters[15]][i];
-		}
-	}
-	else if (state.ioRegisters[17] == 1) // diskstatus=1 (busy handling a read/write commad)
-	{
-		timer_disk++;
-	}
-	if (timer_disk == DISK_CYCLES) // 1024 cycles
-	{
-		timer_disk = 0;
-		state.ioRegisters[17] = 0;
-		state.ioRegisters[4] = 1; // irqstatus1=1
-		state.ioRegisters[14] = 0;
-	}
-}
-
-void PerformInterrupt()
+void perform_interrupt()
 {
 	int irq = (state.state.ioRegistersisters[IRQ0ENABLE] && state.ioRegisters[IRQ0STATUS]) || (state.ioRegisters[IRQ1ENABLE] && state.ioRegisters[IRQ1STATUS]) || (state.ioRegisters[IRQ2ENABLE] && state.ioRegisters[IRQ2STATUS]);
 	if (irq && !state.isActiveIRQ)

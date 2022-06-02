@@ -1,6 +1,7 @@
 // Includes:
 #include "ops.h"
 #include "global.h"
+#include "files.h"
 
 // Operation implementations:
 
@@ -129,6 +130,7 @@ void reti()
 void in()
 {
     state.registers[state.rd] = state.ioRegisters[state.registers[state.rs] + state.registers[state.rt]];
+    WriteToHwregtraceFile("READ");
 }
 
 // Out - write to I/O
@@ -153,7 +155,7 @@ void out()
         break;
     }
 
-    WriteToHwregtraceFile();
+    WriteToHwregtraceFile("WRITE");
 }
 
 // Operation parsing:

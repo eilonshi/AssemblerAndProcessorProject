@@ -32,7 +32,7 @@ void OpenAllFiles(const char *argv[])
     monitor_yuv_file = OpenFile(argv[13], "wb");
 }
 
-void CloseAllFiles()
+void close_all_files()
 {
     if (memin_file != NULL)
         fclose(memin_file);
@@ -64,23 +64,88 @@ void CloseAllFiles()
 
 void WriteToLedsFile()
 {
-    fprintf(leds_file, "%d %08x\n", state.ioRegisters[8], state.ioRegisters[9]);
+    fprintf(leds_file, "%d %08x\n", state.ioRegisters[CLKS], state.ioRegisters[LEDS]);
 }
 
 void WriteToDisplay7SegFile()
 {
-    fprintf(display7seg_file, "%d %08x\n", state.ioRegisters[8], state.ioRegisters[10]);
+    fprintf(display7seg_file, "%d %08x\n", state.ioRegisters[CLKS], state.ioRegisters[DISPLAY7SEG]);
 }
 
 void WritePixelToMonitor()
 {
     int x = state.ioRegisters[MONITOR_ADDR] & 0X00FF;
     int y = (state.ioRegisters[MONITOR_ADDR] >> 8) & 0X00FF;
-    Monitor[x][y] = state.ioRegisters[MONITOR_DATA];
-    // TODO: write to monitor file
+    state.monitor[x][y] = state.ioRegisters[MONITOR_DATA];
 }
 
-void WriteToHwregtraceFile()
+void WriteToHwregtraceFile(char *operation_read_or_write)
 {
-    fprintf(hwregtrace_file, "%d WRITE %s %08x\n", state.ioRegisters[8], IO_reg_names[Regsters[rs] + Regsters[rt]], state.ioRegisters[Regsters[rs] + Regsters[rt]]);
+    fprintf(hwregtrace_file, "%d %s %s %08x\n", state.ioRegisters[CLKS], operation_read_or_write, IO_REGISTER_NAMES[state.registers[state.rs] + state.registers[state.rt]], state.ioRegisters[state.registers[state.rs] + state.registers[state.rt]]);
+}
+
+void WriteToTrace()
+{
+    fprintf(trace_file, "%03X %012llX ", state.pc, state.instruction);
+    for (int i = 0; i < NUM_REGISTERS; i++)
+        fprintf(trace_file, "%08x ", state.registers[i]);
+    fprintf(trace_file, "\n");
+}
+
+void WriteToRegout()
+{
+    for (int i = PRINT_FROM_REGISTER_NUM; i < NUM_REGISTERS; i++)
+        fprintf(regout_file, "%08X\n", state.registers[i]);
+}
+
+void WriteToCycles()
+{
+    fprintf(cycles_file, "%d\n", state.ioRegisters[8]);
+}
+
+void WriteToDiskout()
+{
+    // Calc max addresses of non zero data
+    int max_i;
+    int max_j;
+    int flag = FALSE;
+    for (max_i = NUM_SECTORS - 1; max_i >= 0; max_i--)
+    {
+        for (max_j = SIZE_SECTOR - 1; max_j >= 0; max_j--)
+        {
+            if (state.disk[max_i][max_j])
+            {
+                flag = TRUE;
+                break;
+            }
+        }
+        if (flag)
+            break;
+    }
+
+    // Write to diskout_file
+    for (int i = 0; i <= max_i; i++)
+    {
+        for (int j = 0; j <= max_j; j++)
+        {
+            fprintf(diskout_file, "%012llX\n", state.disk[i][j]);
+        }
+    }
+}
+
+void WriteToMonitor()
+{
+    unsigned char monitorYuv[MONITOR_WIDTH * MONITOR_HEIGHT] = {0};
+    int pixel_num = 0;
+
+    for (int row = 0; row < MONITOR_HEIGHT; row++)
+    {
+        for (int col = 0; col < MONITOR_WIDTH; col++)
+        {
+            fprintf(monitor_file, "%02X\n", state.monitor[col][row]);
+            monitorYuv[pixel_num] = state.monitor[col][row];
+            pixel_num++;
+        }
+    }
+    fwrite(monitorYuv, 1, MONITOR_WIDTH * MONITOR_HEIGHT, monitor_yuv_file);
 }

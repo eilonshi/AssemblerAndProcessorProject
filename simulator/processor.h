@@ -1,6 +1,6 @@
-void runProcessor();
+void run_processor();
 void fetch();
 void decode();
 void execute();
-void memory();
+void write_to_disk();
 void writeBack();

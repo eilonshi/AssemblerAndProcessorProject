@@ -64,12 +64,28 @@
 #define MONITOR_DATA 21
 #define MONITOR_CMD 22
 
+// I/O consts:
+#define BUSY 1
+#define FREE 0
+#define NO_COMMAND 0
+#define READ_SECTOR 1
+#define WRITE_SECTOR 2
+#define NUM_SECTORS 128
+#define SIZE_SECTOR 128
+#define DISK_CYCLES 1024
+#define MONITOR_WIDTH 256
+#define MONITOR_HEIGHT 256
+
 // General consts:
 #define TRUE 1
 #define FALSE 0
 #define NUM_REGISTERS 16
 #define NUM_IO_REGISTERS 23
 #define MEMORY_SIZE 4096
+#define PRINT_FROM_REGISTER_NUM 2
 
 // Globals:
 extern state;
+extern IO_REGISTER_NAMES;
+
+void initialize_globals();
