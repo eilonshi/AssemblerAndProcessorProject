@@ -1,15 +1,18 @@
-// Includes
+#include <stdio.h>
+#include <stdlib.h>
 #include "ops.h"
 #include "global.h"
 #include "files.h"
 #include "interrupts.h"
+#include "state.h"
 
 void fetch()
 {
+    // printf("pc is %d\n", state.pc);
     state.instruction = state.memory[state.pc];
-    state.pc++;
-
     UpdateTimer();
+
+    // printf("fetched instruction: %05x\n", state.instruction);
 }
 
 void decode()
@@ -19,16 +22,29 @@ void decode()
     state.rd = get_rd();
     state.opcode = get_opcode();
 
-    if (state.rt == IMM_REG_NUM | state.rs == IMM_REG_NUM)
+    if (state.rt == IMM_REG_NUM || state.rs == IMM_REG_NUM || state.rd == IMM_REG_NUM)
     {
-        fetch();
-        state.imm = GetImm();
+        state.imm = state.memory[state.pc + 1];
+        UpdateTimer();
+        state.registers[IMM_REG_NUM] = GetImm();
     }
 }
 
 void execute()
 {
-    // Do the operation
+    // printf("pc is %03X\n", state.pc);
+    // printf("operation is %d\n", state.opcode);
+    // printf("rt        is %d\n", state.rt);
+    // printf("rs        is %d\n", state.rs);
+    // printf("rd        is %d\n", state.rd);
+    write_trace();
+
+    if (state.rt == IMM_REG_NUM || state.rs == IMM_REG_NUM)
+        state.pc += 2;
+    else
+        state.pc++;
+
+    // Execute the instuction
     switch (state.opcode)
     {
     case ADD_OP_NUM:
@@ -38,7 +54,7 @@ void execute()
         sub();
         break;
     case MUL_OP_NUM:
-        mac();
+        mul();
         break;
     case AND_OP_NUM:
         and();
@@ -100,11 +116,11 @@ void execute()
         break;
 
     default:
-        printf("ERROR: Instruction not recognized");
+        printf("ERROR: opcode %d not recognized\n", state.opcode);
+        close_all_files();
+        exit(-1);
         break;
     }
-
-    WriteToTrace();
 }
 
 void write_to_disk()
@@ -125,7 +141,7 @@ void write_to_disk()
                 state.memory[state.ioRegisters[DISK_BUFFER] + i] = state.disk[state.ioRegisters[DISK_SECTOR]][i];
         }
     }
-    
+
     if (state.timer_disk == DISK_CYCLES)
     {
         state.timer_disk = 0;
@@ -146,6 +162,12 @@ void run_processor()
         write_to_disk();
         perform_interrupt();
 
-        WriteToTrace();
+        // int stop_at_cycle = 60;
+        // if (state.ioRegisters[CLKS] >= stop_at_cycle)
+        // {
+        //     printf("Finished at clock cycle %d\n", stop_at_cycle);
+        //     close_all_files();
+        //     exit(-1);
+        // }
     }
 }

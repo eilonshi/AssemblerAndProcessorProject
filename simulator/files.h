@@ -14,15 +14,19 @@ extern FILE *diskout_file;
 extern FILE *monitor_file;
 extern FILE *monitor_yuv_file;
 
-void open_all_files();
+void open_all_files(char *argv[]);
 void close_all_files();
+
+void read_memin();
+void read_diskin();
+void read_next_irq2();
 
 void WriteToLedsFile();
 void WriteToDisplay7SegFile();
 void WritePixelToMonitor();
 void WriteToHwregtraceFile();
-void WriteToTrace();
-void WriteToRegout();
-void WriteToCycles();
-void WriteToDiskout();
-void WriteToMonitor();
+void write_trace();
+void write_regout();
+void write_cycles();
+void write_diskout();
+void write_monitor();

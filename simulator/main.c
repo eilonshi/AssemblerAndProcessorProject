@@ -1,21 +1,29 @@
 #include "global.h"
 #include "files.h"
+#include "processor.h"
+#include "state.h"
 
-void initialize(const char *argv[])
+void initialize(char *argv[]);
+void summarize_in_files();
+
+void initialize(char *argv[])
 {
 	initialize_globals();
+	initialize_state();
 	open_all_files(argv);
+
 	read_memin();
 	read_diskin();
-	read_irq2in();
+	read_next_irq2();
 }
 
 void summarize_in_files()
 {
-	WriteToRegout();
-	WriteToCycles();
-	WriteToDiskout();
-	WriteToMonitor();
+	write_regout();
+	write_cycles();
+	write_diskout();
+	write_monitor();
+
 	close_all_files();
 }
 

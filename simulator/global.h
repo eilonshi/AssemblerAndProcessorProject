@@ -82,10 +82,10 @@
 #define NUM_REGISTERS 16
 #define NUM_IO_REGISTERS 23
 #define MEMORY_SIZE 4096
+#define INSTRUCTION_LENGTH_HEX 6
 #define PRINT_FROM_REGISTER_NUM 2
+#define LONG_BYTES_NUM 16
 
-// Globals:
-extern state;
-extern IO_REGISTER_NAMES;
+const char *IO_REGISTER_NAMES[NUM_IO_REGISTERS];
 
 void initialize_globals();

@@ -2,101 +2,102 @@
 #include "ops.h"
 #include "global.h"
 #include "files.h"
+#include "state.h"
 
 // Operation implementations:
 
 // Addition
 void add()
 {
-    state.registers[state.rd] = state.registers[state.rd] + state.registers[state.rt];
+    state.registers[state.rd] = state.registers[state.rs] + state.registers[state.rt];
 }
 
 // Subtruction
 void sub()
 {
-    state.registers[state.rd] = state.registers[state.rd] - state.registers[state.rt];
+    state.registers[state.rd] = state.registers[state.rs] - state.registers[state.rt];
 }
 
 // Multiplication
 void mul()
 {
-    state.registers[state.rd] = state.registers[state.rd] * state.registers[state.rt];
+    state.registers[state.rd] = state.registers[state.rs] * state.registers[state.rt];
 }
 
 // AND bitwise operator
 void and ()
 {
-    state.registers[state.rd] = state.registers[state.rd] & state.registers[state.rt];
+    state.registers[state.rd] = state.registers[state.rs] & state.registers[state.rt];
 }
 
 // OR bitwise operator
 void or ()
 {
-    state.registers[state.rd] = state.registers[state.rd] | state.registers[state.rt];
+    state.registers[state.rd] = state.registers[state.rs] | state.registers[state.rt];
 }
 
 // XOR bitwise operator
 void xor () {
-    state.registers[state.rd] = state.registers[state.rd] ^ state.registers[state.rt];
+    state.registers[state.rd] = state.registers[state.rs] ^ state.registers[state.rt];
 }
 
     // Shift left logical
     void sll()
 {
-    state.registers[state.rd] = state.registers[state.rd] << state.registers[state.rt];
+    state.registers[state.rd] = state.registers[state.rs] << state.registers[state.rt];
 }
 
 // Shift right arighmetic
 void sra()
 {
-    state.registers[state.rd] = state.registers[state.rd] >> state.registers[state.rt];
+    state.registers[state.rd] = state.registers[state.rs] >> state.registers[state.rt];
 }
 
 // Shift right logical
 void srl()
 {
-    state.registers[state.rd] = (int)((unsigned int)state.registers[state.rd] >> state.registers[state.rt]);
+    state.registers[state.rd] = (int)((unsigned int)state.registers[state.rs] >> state.registers[state.rt]);
 }
 
 // Branch on equal
 void beq()
 {
-    if (state.registers[state.rd] == state.registers[state.rt])
+    if (state.registers[state.rs] == state.registers[state.rt])
         state.pc = state.registers[state.rd];
 }
 
 // Branch on not equal
 void bne()
 {
-    if (state.registers[state.rd] != state.registers[state.rt])
+    if (state.registers[state.rs] != state.registers[state.rt])
         state.pc = state.registers[state.rd];
 }
 
 // Branch on less than
 void blt()
 {
-    if (state.registers[state.rd] < state.registers[state.rt])
+    if (state.registers[state.rs] < state.registers[state.rt])
         state.pc = state.registers[state.rd];
 }
 
 // Branch on greater than
 void bgt()
 {
-    if (state.registers[state.rd] > state.registers[state.rt])
+    if (state.registers[state.rs] > state.registers[state.rt])
         state.pc = state.registers[state.rd];
 }
 
 // Branch on less than or equal
 void ble()
 {
-    if (state.registers[state.rd] <= state.registers[state.rt])
+    if (state.registers[state.rs] <= state.registers[state.rt])
         state.pc = state.registers[state.rd];
 }
 
 // Branch on greater than or equal
 void bge()
 {
-    if (state.registers[state.rd] >= state.registers[state.rt])
+    if (state.registers[state.rs] >= state.registers[state.rt])
         state.pc = state.registers[state.rd];
 }
 
@@ -110,13 +111,13 @@ void jal()
 // Load word
 void lw()
 {
-    state.registers[state.rd] = state.memory[state.registers[state.rd] + state.registers[state.rt]];
+    state.registers[state.rd] = state.memory[state.registers[state.rs] + state.registers[state.rt]];
 }
 
 // Store word
 void sw()
 {
-    state.memory[state.registers[state.rd] + state.registers[state.rt]] = state.registers[state.rd];
+    state.memory[state.registers[state.rs] + state.registers[state.rt]] = state.registers[state.rd];
 }
 
 // Return from interrupt
@@ -158,24 +159,35 @@ void out()
     WriteToHwregtraceFile("WRITE");
 }
 
+int sign_extention_from_20_bit_to_32_bit(int num)
+{
+    int extended_num = num;
+    extended_num = extended_num << 12;
+    extended_num = extended_num >> 12;
+
+    return extended_num;
+}
+
 // Operation parsing:
 int get_rt()
 {
-    state.rt = state.instruction & 0xF;
+    return state.instruction & 0xF;
 }
 int get_rs()
 {
-    state.rs = (state.instruction >> 4) & 0xF;
+    return (state.instruction >> 4) & 0xF;
 }
 int get_rd()
 {
-    state.rd = (state.instruction >> 8) & 0xF;
+    return (state.instruction >> 8) & 0xF;
 }
 int get_opcode()
 {
-    state.opcode = (state.instruction >> 12) & 0xFF;
+    return (state.instruction >> 12) & 0xFF;
 }
 int GetImm()
 {
-    return state.instruction & 0xFFFFF;
+    int imm = state.imm & 0xFFFFF;
+    int extended_imm = sign_extention_from_20_bit_to_32_bit(imm);
+    return extended_imm;
 }

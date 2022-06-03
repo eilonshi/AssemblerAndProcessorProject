@@ -1,16 +1,11 @@
 #include "global.h"
-
-int GetNextIRQ2()
-{
-	int num = 0;
-	if (!feof(irq2in_file) && fscanf_s(irq2in_file, "%d ", &num))
-		return num;
-}
+#include "state.h"
+#include "files.h"
 
 void UpdateTimer()
 {
-    state.ioRegisters[CLKS] = (state.ioRegisters[CLKS] + 1) % 0xffffffff;
-	
+	state.ioRegisters[CLKS] = (state.ioRegisters[CLKS] + 1) % 0xffffffff;
+
 	if (state.ioRegisters[TIMER_ENABLE] == TRUE)
 	{
 		if (state.ioRegisters[TIMER_CURRENT] == state.ioRegisters[TIMER_MAX])
@@ -23,19 +18,32 @@ void UpdateTimer()
 	}
 
 	if (state.ioRegisters[DISK_STATUS] == BUSY)
-    {
-        state.timer_disk++;
-    }
+	{
+		state.timer_disk++;
+	}
+}
+
+void update_irq2()
+{
+	printf("%03X: check irq2 %d == %d\n", state.pc, state.next_irq2, state.ioRegisters[CLKS]);
+	if (state.next_irq2 == state.ioRegisters[CLKS])
+	{
+		state.ioRegisters[IRQ2STATUS] = TRUE;
+		read_next_irq2();
+	}
 }
 
 void perform_interrupt()
 {
-	int irq = (state.state.ioRegistersisters[IRQ0ENABLE] && state.ioRegisters[IRQ0STATUS]) || (state.ioRegisters[IRQ1ENABLE] && state.ioRegisters[IRQ1STATUS]) || (state.ioRegisters[IRQ2ENABLE] && state.ioRegisters[IRQ2STATUS]);
+	update_irq2();
+	int irq = (state.ioRegisters[IRQ0ENABLE] && state.ioRegisters[IRQ0STATUS]) || (state.ioRegisters[IRQ1ENABLE] && state.ioRegisters[IRQ1STATUS]) || (state.ioRegisters[IRQ2ENABLE] && state.ioRegisters[IRQ2STATUS]);
+
 	if (irq && !state.isActiveIRQ)
 	{
 		state.isActiveIRQ = TRUE;
-		state.ioRegisters[IRQ_RETURN] = state.pc;  // irqreturn = PC
-		state.pc = state.ioRegisters[IRQ_HANDLER]; // PC = irqhandler
+		state.ioRegisters[IRQ_RETURN] = state.pc;
+		state.pc = state.ioRegisters[IRQ_HANDLER];
 	}
-	state.ioRegisters[5] = 0; // irq2status = 0
+
+	state.ioRegisters[IRQ2STATUS] = FALSE;
 }
