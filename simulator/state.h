@@ -13,6 +13,7 @@ typedef struct stateStruct
     int isActiveIRQ;
     int timer_disk;
     int next_irq2;
+    int stop_running;
     int registers[NUM_REGISTERS];
     int ioRegisters[NUM_IO_REGISTERS];
     int memory[MEMORY_SIZE];
@@ -23,3 +24,4 @@ typedef struct stateStruct
 extern stateStruct state;
 
 void initialize_state();
+void update_monitor();

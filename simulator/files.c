@@ -119,37 +119,52 @@ void read_diskin()
 void read_next_irq2()
 {
     int num = 0;
-    if (!feof(irq2in_file) && fscanf(irq2in_file, "%d ", &num))
-        state.next_irq2 = num;
+    if (!feof(irq2in_file))
+    {
+        if (fscanf(irq2in_file, "%d ", &num))
+            state.next_irq2 = num;
+    }
+    else
+        state.next_irq2 = NO_INTERRUPT;
+    printf("next irq2 is %d\n", state.next_irq2);
 }
 
-void WriteToLedsFile()
+void write_memout()
 {
-    fprintf(leds_file, "%d %08X\n", state.ioRegisters[CLKS], state.ioRegisters[LEDS]);
+    // Find the maximum address of non-zero memory
+    int max_non_zero_address = MEMORY_SIZE - 1;
+    for (; max_non_zero_address >= 0; max_non_zero_address--)
+        if (state.memory[max_non_zero_address] != 0)
+            break;
+
+    for (int i = 0; i <= max_non_zero_address; i++)
+        fprintf(memout_file, "%05X\n", state.memory[i]);
 }
 
-void WriteToDisplay7SegFile()
+void write_leds()
 {
-    fprintf(display7seg_file, "%d %08X\n", state.ioRegisters[CLKS], state.ioRegisters[DISPLAY7SEG]);
+    fprintf(leds_file, "%d %08X\n", state.ioRegisters[CLKS] - 1, state.ioRegisters[LEDS]);
 }
 
-void WritePixelToMonitor()
+void write_display7seg()
 {
-    int x = state.ioRegisters[MONITOR_ADDR] & 0X00FF;
-    int y = (state.ioRegisters[MONITOR_ADDR] >> 8) & 0X00FF;
-    state.monitor[x][y] = state.ioRegisters[MONITOR_DATA];
+    fprintf(display7seg_file, "%d %08X\n", state.ioRegisters[CLKS] - 1, state.ioRegisters[DISPLAY7SEG]);
 }
 
-void WriteToHwregtraceFile(char operation_read_or_write[])
+void write_hwregtrace(char operation_read_or_write[])
 {
-    fprintf(hwregtrace_file, "%d %s %s %08X\n", state.ioRegisters[CLKS], operation_read_or_write, IO_REGISTER_NAMES[state.registers[state.rs] + state.registers[state.rt]], state.ioRegisters[state.registers[state.rs] + state.registers[state.rt]]);
+    fprintf(hwregtrace_file, "%d %s %s %08X\n", state.ioRegisters[CLKS] - 1, operation_read_or_write, IO_REGISTER_NAMES[state.registers[state.rs] + state.registers[state.rt]], state.ioRegisters[state.registers[state.rs] + state.registers[state.rt]]);
 }
 
 void write_trace()
 {
     fprintf(trace_file, "%03X %05X ", state.pc, state.instruction);
     for (int i = 0; i < NUM_REGISTERS; i++)
-        fprintf(trace_file, "%08X ", state.registers[i]);
+    {
+        fprintf(trace_file, "%08X", state.registers[i]);
+        if (i + 1 < NUM_REGISTERS)
+            fprintf(trace_file, " ");
+    }
     fprintf(trace_file, "\n");
 }
 
@@ -189,7 +204,7 @@ void write_diskout()
     {
         for (int j = 0; j <= max_j; j++)
         {
-            fprintf(diskout_file, "%04x\n", state.disk[i][j]);
+            fprintf(diskout_file, "%05X\n", state.disk[i][j]);
         }
     }
 }
@@ -203,7 +218,7 @@ void write_monitor()
     {
         for (int col = 0; col < MONITOR_WIDTH; col++)
         {
-            fprintf(monitor_file, "%02x\n", state.monitor[col][row]);
+            fprintf(monitor_file, "%02X\n", state.monitor[col][row]);
             monitorYuv[pixel_num] = state.monitor[col][row];
             pixel_num++;
         }

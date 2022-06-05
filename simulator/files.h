@@ -21,10 +21,10 @@ void read_memin();
 void read_diskin();
 void read_next_irq2();
 
-void WriteToLedsFile();
-void WriteToDisplay7SegFile();
-void WritePixelToMonitor();
-void WriteToHwregtraceFile();
+void write_memout();
+void write_leds();
+void write_display7seg();
+void write_hwregtrace();
 void write_trace();
 void write_regout();
 void write_cycles();

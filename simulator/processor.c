@@ -26,8 +26,10 @@ void decode()
     {
         state.imm = state.memory[state.pc + 1];
         UpdateTimer();
-        state.registers[IMM_REG_NUM] = GetImm();
+        state.registers[IMM_REG_NUM] = get_imm();
     }
+    else
+        state.registers[IMM_REG_NUM] = 0;
 }
 
 void execute()
@@ -39,7 +41,7 @@ void execute()
     // printf("rd        is %d\n", state.rd);
     write_trace();
 
-    if (state.rt == IMM_REG_NUM || state.rs == IMM_REG_NUM)
+    if (state.rt == IMM_REG_NUM || state.rs == IMM_REG_NUM || state.rd == IMM_REG_NUM)
         state.pc += 2;
     else
         state.pc++;
@@ -96,12 +98,12 @@ void execute()
         jal();
         break;
     case LW_OP_NUM:
-        lw();
         UpdateTimer();
+        lw();
         break;
     case SW_OP_NUM:
-        sw();
         UpdateTimer();
+        sw();
         break;
     case RETI_OP_NUM:
         reti();
@@ -113,6 +115,7 @@ void execute()
         out();
         break;
     case HALT_OP_NUM:
+        halt();
         break;
 
     default:
@@ -153,21 +156,22 @@ void write_to_disk()
 
 void run_processor()
 {
-    while (TRUE)
+    while (!state.stop_running)
     {
+        perform_interrupt();
+
         fetch();   // IF stage
         decode();  // ID stage
         execute(); // EX stage
 
         write_to_disk();
-        perform_interrupt();
 
-        // int stop_at_cycle = 60;
-        // if (state.ioRegisters[CLKS] >= stop_at_cycle)
-        // {
-        //     printf("Finished at clock cycle %d\n", stop_at_cycle);
-        //     close_all_files();
-        //     exit(-1);
-        // }
+        int stop_at_cycle = 5000;
+        if (state.ioRegisters[CLKS] >= stop_at_cycle)
+        {
+            printf("Finished at clock cycle %d\n", stop_at_cycle);
+            close_all_files();
+            exit(-1);
+        }
     }
 }

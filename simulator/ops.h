@@ -23,9 +23,10 @@ void sw();
 void reti();
 void in();
 void out();
+void halt();
 
 int get_rt();
 int get_rs();
 int get_rd();
 int get_opcode();
-int GetImm();
+int get_imm();

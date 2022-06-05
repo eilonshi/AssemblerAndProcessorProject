@@ -104,7 +104,7 @@ void bge()
 // Jump and link
 void jal()
 {
-    state.registers[state.rd] = state.pc + 1;
+    state.registers[state.rd] = state.pc;
     state.pc = state.registers[state.rs];
 }
 
@@ -125,13 +125,14 @@ void reti()
 {
     state.pc = state.ioRegisters[IRQ_RETURN];
     state.isActiveIRQ = FALSE;
+    printf("%d %03X returning from interrupt\n", state.ioRegisters[CLKS], state.pc);
 }
 
 // In - read from I/O
 void in()
 {
     state.registers[state.rd] = state.ioRegisters[state.registers[state.rs] + state.registers[state.rt]];
-    WriteToHwregtraceFile("READ");
+    write_hwregtrace("READ");
 }
 
 // Out - write to I/O
@@ -139,24 +140,31 @@ void out()
 {
     int write_to = state.registers[state.rs] + state.registers[state.rt];
     state.ioRegisters[write_to] = state.registers[state.rd];
+    // printf("writing %d to io[%d]\n", state.registers[state.rd], write_to);
 
     switch (write_to)
     {
     case LEDS:
-        WriteToLedsFile();
+        write_leds();
         break;
     case DISPLAY7SEG:
-        WriteToDisplay7SegFile();
+        write_display7seg();
         break;
     case MONITOR_CMD:
         if (state.ioRegisters[MONITOR_CMD])
-            WritePixelToMonitor();
+            update_monitor();
         break;
     default:
         break;
     }
 
-    WriteToHwregtraceFile("WRITE");
+    write_hwregtrace("WRITE");
+}
+
+// Halt - stop running
+void halt()
+{
+    state.stop_running = TRUE;
 }
 
 int sign_extention_from_20_bit_to_32_bit(int num)
@@ -185,7 +193,7 @@ int get_opcode()
 {
     return (state.instruction >> 12) & 0xFF;
 }
-int GetImm()
+int get_imm()
 {
     int imm = state.imm & 0xFFFFF;
     int extended_imm = sign_extention_from_20_bit_to_32_bit(imm);

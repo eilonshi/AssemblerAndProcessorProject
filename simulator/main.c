@@ -19,11 +19,11 @@ void initialize(char *argv[])
 
 void summarize_in_files()
 {
+	write_memout();
 	write_regout();
 	write_cycles();
 	write_diskout();
 	write_monitor();
-
 	close_all_files();
 }
 
