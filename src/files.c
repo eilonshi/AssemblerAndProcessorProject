@@ -89,9 +89,7 @@ void read_memin()
     {
         if (strcmp(line, "\n"))
         {
-            // printf("line   is: %s\n", line);
             state.memory[i] = (int)strtol(line, NULL, LONG_BYTES_NUM);
-            // printf("memory is: %05x\n", state.memory[i]);
             i++;
         }
     }
@@ -126,7 +124,6 @@ void read_next_irq2()
     }
     else
         state.next_irq2 = NO_INTERRUPT;
-    printf("next irq2 is %d\n", state.next_irq2);
 }
 
 void write_memout()

@@ -25,7 +25,6 @@ void UpdateTimer()
 
 void update_irq2()
 {
-	// printf("%03X: check irq2 %d <= %d\n", state.pc, state.next_irq2, state.ioRegisters[CLKS]);
 	if (state.next_irq2 != NO_INTERRUPT && state.ioRegisters[CLKS] > state.next_irq2)
 	{
 		state.ioRegisters[IRQ2STATUS] = TRUE;
@@ -42,9 +41,7 @@ void perform_interrupt()
 	{
 		state.isActiveIRQ = TRUE;
 		state.ioRegisters[IRQ_RETURN] = state.pc;
-		printf("irq return = %03X\n", state.pc);
 		state.pc = state.ioRegisters[IRQ_HANDLER];
-		printf("%d %03X: performing interrupt %01X %01X %01X    %01X %01X %01X\n", state.ioRegisters[CLKS], state.pc, state.ioRegisters[IRQ0STATUS], state.ioRegisters[IRQ1STATUS], state.ioRegisters[IRQ2STATUS], state.ioRegisters[IRQ0ENABLE], state.ioRegisters[IRQ1ENABLE], state.ioRegisters[IRQ2ENABLE]);
 		state.ioRegisters[IRQ2STATUS] = FALSE;
 	}
 }

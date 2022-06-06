@@ -8,11 +8,8 @@
 
 void fetch()
 {
-    // printf("pc is %d\n", state.pc);
     state.instruction = state.memory[state.pc];
     UpdateTimer();
-
-    // printf("fetched instruction: %05x\n", state.instruction);
 }
 
 void decode()
@@ -34,11 +31,6 @@ void decode()
 
 void execute()
 {
-    // printf("pc is %03X\n", state.pc);
-    // printf("operation is %d\n", state.opcode);
-    // printf("rt        is %d\n", state.rt);
-    // printf("rs        is %d\n", state.rs);
-    // printf("rd        is %d\n", state.rd);
     write_trace();
 
     if (state.rt == IMM_REG_NUM || state.rs == IMM_REG_NUM || state.rd == IMM_REG_NUM)
@@ -165,13 +157,5 @@ void run_processor()
         execute(); // EX stage
 
         write_to_disk();
-
-        int stop_at_cycle = 5000;
-        if (state.ioRegisters[CLKS] >= stop_at_cycle)
-        {
-            printf("Finished at clock cycle %d\n", stop_at_cycle);
-            close_all_files();
-            exit(-1);
-        }
     }
 }

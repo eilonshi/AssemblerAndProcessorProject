@@ -125,7 +125,6 @@ void reti()
 {
     state.pc = state.ioRegisters[IRQ_RETURN];
     state.isActiveIRQ = FALSE;
-    printf("%d %03X returning from interrupt\n", state.ioRegisters[CLKS], state.pc);
 }
 
 // In - read from I/O
@@ -140,7 +139,6 @@ void out()
 {
     int write_to = state.registers[state.rs] + state.registers[state.rt];
     state.ioRegisters[write_to] = state.registers[state.rd];
-    // printf("writing %d to io[%d]\n", state.registers[state.rd], write_to);
 
     switch (write_to)
     {
