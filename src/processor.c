@@ -9,7 +9,7 @@
 void fetch()
 {
     state.instruction = state.memory[state.pc];
-    UpdateTimer();
+    update_timer();
 }
 
 void decode()
@@ -22,7 +22,7 @@ void decode()
     if (state.rt == IMM_REG_NUM || state.rs == IMM_REG_NUM || state.rd == IMM_REG_NUM)
     {
         state.imm = state.memory[state.pc + 1];
-        UpdateTimer();
+        update_timer();
         state.registers[IMM_REG_NUM] = get_imm();
     }
     else
@@ -90,11 +90,11 @@ void execute()
         jal();
         break;
     case LW_OP_NUM:
-        UpdateTimer();
+        update_timer();
         lw();
         break;
     case SW_OP_NUM:
-        UpdateTimer();
+        update_timer();
         sw();
         break;
     case RETI_OP_NUM:

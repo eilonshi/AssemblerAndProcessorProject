@@ -89,4 +89,5 @@
 
 const char *IO_REGISTER_NAMES[NUM_IO_REGISTERS];
 
+/* Initializes the relevant globals for the simulation */
 void initialize_globals();

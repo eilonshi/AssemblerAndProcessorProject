@@ -2,7 +2,7 @@
 #include "state.h"
 #include "files.h"
 
-void UpdateTimer()
+void update_timer()
 {
 	state.ioRegisters[CLKS] = (state.ioRegisters[CLKS] + 1) % 0xffffffff;
 

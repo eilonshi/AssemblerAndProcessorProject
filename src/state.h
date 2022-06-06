@@ -1,6 +1,6 @@
 #include "global.h"
 
-// Structs:
+// A struct of the state that represents the current state of the cpu, memory and disk
 typedef struct stateStruct
 {
     int pc;
@@ -23,5 +23,7 @@ typedef struct stateStruct
 
 extern stateStruct state;
 
+/* Initializes the state attributes */
 void initialize_state();
+/* Updates the monitor array values */
 void update_monitor();
